@@ -1,5 +1,6 @@
 class Char {
-    constructor (name, lvl, xp, reqXp, life, intel, dex, str, inventory) {
+    constructor (icon, name, lvl, xp, reqXp, life, intel, dex, str, inventory) {
+        this.icon = icon,
         this.name = name,
         this.lvl = lvl,
         this.xp = xp,
@@ -17,7 +18,7 @@ class Char {
         this.inventory.push(item)
     }
 
-    hasItem(item) {
+    getItem(item) {
         return this.inventory.indexOf(item)
     }
 
@@ -54,15 +55,15 @@ class Boss {
         str: null,
         item: null
     }
-    constructor (name, minStats) {
+    constructor (icon, name, minStats) {
         this.name = name
-        
+        this.icon = icon
         if (typeof minStats === "object"){
             for (const prop in minStats) {
-                if (typeof minStats[prop] === "number" || minStats[prop] === null) {
+                if (typeof minStats[prop] === "number" || minStats[prop] === null || typeof minStats[prop] === "object") {
                     this.minStats[prop] = minStats[prop]
                 } else {
-                    throw new Error ("Failed to create new boss " + name + " due to invalid minStats property type (must be number): " + minStats[prop])
+                    throw new Error ("Failed to create new boss " + name + " due to invalid minStats property type (must be number, null or object): " + minStats[prop])
                 }
             }
         } else {
@@ -82,4 +83,40 @@ const defineMinStats = (lvl, life, intel, dex, str) => {
     }
 }
 
-export {Char, Boss, defineMinStats}
+class Expedition {
+    constructor (art, name, desc, type, lvl, xpValue, itemDrop, prob, itemProb) {
+        this.art = art
+        this.name = name
+        this.desc = desc
+        this.type = type
+        this.lvl = lvl
+        this.xpValue = xpValue
+        this.itemDrop = itemDrop
+        this.prob = prob
+        this.itemProb = itemProb
+    }
+    
+    giveDrop () {
+        Math.random() > this.itemDrop
+            
+    }
+
+    isSuccessful () {
+        Math.random() > this.prob
+    }
+
+    send(char) {
+        (this.isSuccessful ?
+            () => {
+                char.addItem(this.itemDrop)
+                char.gainXP(this.xpValue)
+                return "Sucesso!"
+            }
+        :   () => {
+                return "Falha :("
+            }
+        )
+    }
+} 
+
+export {Char, Boss, defineMinStats, Expedition}
