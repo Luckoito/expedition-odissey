@@ -1,7 +1,7 @@
 class Char {
-    constructor (icon, name, lvl, xp, reqXp, life, intel, dex, str, inventory) {
-        this.icon = icon,
+    constructor (name, icon, lvl, xp, reqXp, life, intel, dex, str, inventory) {
         this.name = name,
+        this.icon = icon,
         this.lvl = lvl,
         this.xp = xp,
         this.reqXp = reqXp,
@@ -15,7 +15,17 @@ class Char {
     }
 
     addItem (item) {
-        this.inventory.push(item)
+        let foundItem = false
+        this.inventory.forEach(el => {
+            if (el.name = item.name) {
+                el.quantity++
+                return foundItem = true;
+            }
+        });
+        if (!foundItem) {
+            this.inventory.push(item)   
+        }
+
     }
 
     getItem(item) {
@@ -84,38 +94,59 @@ const defineMinStats = (lvl, life, intel, dex, str) => {
 }
 
 class Expedition {
-    constructor (art, name, desc, type, lvl, xpValue, itemDrop, prob, itemProb) {
-        this.art = art
+    constructor (name, art, desc, type, lvl, xpValue, drop, prob, dropProb) {
+
         this.name = name
-        this.desc = desc
-        this.type = type
-        this.lvl = lvl
-        this.xpValue = xpValue
-        this.itemDrop = itemDrop
+        this.art = art,
+        this.desc = desc,
+        this.type = type,
+        this.lvl = lvl,
+        this.xpValue = xpValue,
+        this.drop = drop;
+
+        if (prob < 0 || prob > 1) {
+            throw new Error ("Failed to add drop probability percentage, must be between 0 and 1.")
+        } else {
         this.prob = prob
-        this.itemProb = itemProb
+        }
+
+        if (dropProb < 0 || dropProb > 1) {
+            throw new Error ("Failed to add drop probability percentage, must be between 0 and 1.")
+        } else {
+        this.dropProb = dropProb
+        }
+        
     }
     
-    giveDrop () {
-        Math.random() > this.itemDrop
-            
+    _giveDrop (char) {
+        if (Math.random() <= this.dropProb){
+            char.addItem(this.drop)
+            console.log("received drop")
+            return true
+
+        } else {
+            console.log("no drops")
+            return false
+        }
     }
 
-    isSuccessful () {
-        Math.random() > this.prob
+    _isSuccessful () {
+        return Math.random() <= this.prob
     }
 
     send(char) {
-        (this.isSuccessful ?
-            () => {
-                char.addItem(this.itemDrop)
+
+        if (char.lvl >= this.lvl) {
+            if (this._isSuccessful) {
+                this._giveDrop(char)
                 char.gainXP(this.xpValue)
-                return "Sucesso!"
+                return true
+            } else {
+                return false
             }
-        :   () => {
-                return "Falha :("
-            }
-        )
+        } else {
+            console.log("Char lvl does not meet the requirement")
+        }
     }
 } 
 
